@@ -10,18 +10,25 @@ def sendSample( threadName):
     while True:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # Connect to server that plots values
             s.connect(('192.168.1.59', 50000))
         except:
             pass
         while True:
             try:
+                # Open file that is userspace endpoint from kerner driver
                 f = open("/sys/module/scaleKernelDriver/parameters/scale_value", "r")
+                # Read current value from sensor
                 value = f.read()
+                # Close file handle
                 f.close()
+
+                # Serialize data so it can be transfered over network
                 scaleValue = str(value)
                 scaleValueDataInJSON = json.dumps({"scaleValueRaw": scaleValue})
                 print(scaleValueDataInJSON.encode())
                 s.send(scaleValueDataInJSON.encode())
+                
                 time.sleep(0.01)
             except:
                 s.close()
